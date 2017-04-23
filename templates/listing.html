@@ -1,0 +1,33 @@
+<!-- listing.html -->
+{% extends "base.html" %}
+{% block title %}我有話要說{% endblock %}
+<!-- block content -->
+{% block content %}
+<div class='container'>
+<!-- mid: tittle -->
+<div class='row'>
+    <div class='col-md-12'>
+        <div class='panel panel-default'>
+            <div class='panel-heading' align=center>
+            <h3>~~寶寶心裡苦，寶寶只在這裡說~~</h3>
+    </div>
+</div>
+<!-- bottom: mind data display -->
+{% for p in posts %}
+    {% cycle "<div class='row'> <div class='col-md-4'>" "<div class='col-md-4'>" "<div class='col-md-4'>" %}
+        <div class='panel panel-primary'>
+            <div class='panel-heading'>【{{ p.nickname }}】覺得{{ p.mood.status }}</div>
+            <div class='panel-body'>{{ p.message | linebreaks }}</div>
+            <div class='panel-footer' align='right'>
+                <i><small>{{ p.pub_time }}</small></i>
+                <span class="glyphicon glyphicon-trash" onclick='go_delete({{p.id}})'></span>
+            </div>
+        </div>
+    </div>
+    {% cycle "" "" "</div>"%}
+{% endfor %}
+
+<!-- end container -->
+</div>
+<!-- end block content -->
+{% endblock %}
