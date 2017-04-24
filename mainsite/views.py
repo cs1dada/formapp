@@ -3,7 +3,8 @@ from django.shortcuts import render
 from django.template.loader import get_template
 from django.template import RequestContext
 from django.http import HttpResponse, HttpResponseRedirect
-from mainsite import models
+from mainsite import models, forms
+from django.core.mail import EmailMessage
 # Create your views here.
 def index(request, pid=None, del_pass=None):
     # get_template
@@ -67,3 +68,65 @@ def posting(request):
     html = template.render(locals(), request)
     #response
     return HttpResponse(html)    
+
+def contact(request):
+    if request.method == 'POST':
+        #create form instance from request.POST
+        form = forms.ContactForm(request.POST)
+        if form.is_valid():
+            message = " THANKS for your letter"
+            #get data from  class form
+            user_name = form.cleaned_data['user_name']
+            user_city = form.cleaned_data['user_city']
+            user_school = form.cleaned_data['user_school']
+            user_email = form.cleaned_data['user_email']
+            user_message = form.cleaned_data['user_message']
+            #prepare to send email
+            mail_body = u''' 網友姓名：{} \
+                                        居住城市：{} \
+                                        是否在學：{} \
+                                        反應意見：如下 \
+                                        {}'''.format(user_name, user_city, user_school, user_message)
+            
+            # EmailMessage
+            email = EmailMessage(   '來自【不吐不快】網站的網友意見', 
+                                    mail_body, 
+                                    user_email,
+                                    ['cse3dadakiller@gmail.com'])
+            email.send()
+        else:
+            message = " error: please check your input infomation"
+    else:
+        #create form instance
+        form = forms.ContactForm()
+        
+    # get_template
+    template = get_template('contact.html')
+    # for post, use RequestContext to  generate render content
+    #request_context = RequestContext(request)
+    #request_context.push(locals())
+    #render
+    html = template.render(locals(), request)
+    #response
+    return HttpResponse(html)    
+
+def post2db(request):
+    if request.method == 'POST':
+        #create PostForm instance from request.POST
+        post_form = forms.PostForm(request.POST)
+        if post_form.is_valid():
+            message = "您的訊息已儲存，要等管理者啟用後才看得到喔。"
+            post_form.save()
+            return HttpResponseRedirect('/list/')
+        else:
+            message = '如要張貼訊息，則每一個欄位都要填...'
+    else:
+        #create PostForm instance
+        post_form = forms.PostForm()
+    # get_template
+    template = get_template('post2db.html')
+    #moods = models.Mood.objects.all()
+    #render
+    html = template.render(locals(), request)
+    #response
+    return HttpResponse(html)
